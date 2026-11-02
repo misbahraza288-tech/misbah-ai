@@ -390,6 +390,172 @@
     });
   });
 
+
+  /* ---------- content studio (multi-agent pipeline) ---------- */
+  var STUDIO_SYS = "Tum MISBAH AI ke Content Studio ka hissa ho — ek Indian content creator team. Audience: India ke youth (16-25 saal). " +
+    "Hinglish (Roman Hindi + English) mein likho, trendy aur practical. Markdown use karo. Fake stats ya fake trends mat banao.";
+  var STAGES = [
+    { id: "idea", emoji: "💡", name: "Trend / Idea Agent",
+      sys: "Tum 'Trend/Idea Agent' ho. Kaam: reels/shorts ke liye 5 video ideas jo Indian youth ko pasand aayein aur phone se easily shoot ho sakein.",
+      prompt: function (s) {
+        return "Topic: " + s.topic + "\n\nIs topic pe 5 short video ideas do. Format bilkul aisa rakho (har idea ek line):\n" +
+          "1. <Idea ka chhota title> — <1 line mein kya dikhana hai aur kyun chalega>\n...\n5. ...\n\nSabse strong idea #1 pe rakho. Koi extra intro mat likho.";
+      } },
+    { id: "script", emoji: "🎬", name: "Script Agent",
+      sys: "Tum 'Script Agent' ho. Reels/Shorts ke liye 30-60 second ki Hinglish script likhte ho.",
+      prompt: function (s) {
+        return "Topic: " + s.topic + "\nChuna hua idea: " + s.idea + "\n\n30-60 second ki reel script likho:\n" +
+          "- **Hook (0-3 sec)** — scroll rokne wali line\n- Scene-by-scene: time, kya bolna hai (Hinglish), screen pe kya dikhe / text overlay\n- **Ending + CTA** (follow/comment)\nShort aur bolne mein natural rakho.";
+      } },
+    { id: "caption", emoji: "✍️", name: "Title + Caption + Hashtags Agent",
+      sys: "Tum 'Caption Agent' ho. Har platform ke hisaab se title, caption aur hashtags likhte ho.",
+      prompt: function (s) {
+        return "Idea: " + s.idea + "\n\nScript:\n" + s.script.slice(0, 2500) + "\n\nTeen alag section banao, heading ke saath:\n" +
+          "### 📸 Instagram Reels\nCaption (2-4 lines, emoji ke saath) + 15 hashtags\n" +
+          "### ▶️ YouTube Shorts\nTitle (60 characters se kam, #shorts ke saath) + 2 line description + 5-8 hashtags\n" +
+          "### 📘 Facebook\nPost caption (thoda lamba, friendly) + 5 hashtags";
+      } },
+    { id: "shots", emoji: "📷", name: "Thumbnail / Shot-list Agent",
+      sys: "Tum 'Thumbnail & Shot-list Agent' ho. Phone se shoot karne wale creator ko exact batate ho kya film karna hai.",
+      prompt: function (s) {
+        return "Idea: " + s.idea + "\n\nScript:\n" + s.script.slice(0, 2500) + "\n\nDo cheezein do:\n" +
+          "### 🎥 Shot list\nNumbered list: har shot mein kya film karna hai, angle (close-up/wide/selfie), kitne second, aur tip (light/sound).\n" +
+          "### 🖼️ Thumbnail / Cover\n3 thumbnail text options (2-4 bold words), aur photo/frame kaisa ho, colors kaunse.";
+      } }
+  ];
+  var LS_STUDIO = "mai.studio";
+  var studioBusy = false;
+  var studio = get(LS_STUDIO, null);
+
+  function ask(sys, prompt, maxTok) {
+    var key = getKey();
+    if (!key) return Promise.reject({ friendly: "🔑 Pehle **Settings** mein apni free Gemini key daalo. Free key: " + KEY_URL, nokey: true });
+    var model = get(LS.model, DEFAULT_MODEL); if (MODELS.indexOf(model) === -1) model = DEFAULT_MODEL;
+    return callGemini(key, model, {
+      systemInstruction: { parts: [{ text: STUDIO_SYS + " " + sys }] },
+      contents: [{ role: "user", parts: [{ text: prompt }] }],
+      generationConfig: { temperature: 0.9, maxOutputTokens: maxTok || 3000 }
+    }).then(function (d) {
+      var t = extractText(d); if (!t) throw { friendly: "🤐 Khali jawab aaya, dobara try karo." }; return t;
+    }, function (err) {
+      throw { friendly: err && err.message === "http" ? friendlyError(err.status, err.body) : "📡 **Internet problem.** Net check karke dobara try karo." };
+    });
+  }
+
+  function stageCard(st, state, body, onRetry) {
+    var c = el("div", "stage " + state);
+    var hd = el("div", "stage-head");
+    hd.appendChild(el("span", "se", st.emoji)); hd.appendChild(el("b", null, st.name));
+    var label = { waiting: "⏳ waiting", working: "⚙️ working…", done: "✅ done", error: "❌ ruk gaya" }[state];
+    hd.appendChild(el("span", "stage-state", label)); c.appendChild(hd);
+    var bd = el("div", "stage-body");
+    if (body) {
+      bd.innerHTML = MD.render(body);
+      bd.querySelectorAll(".copy-code").forEach(function (btn) { btn.addEventListener("click", function () { copyText(btn.parentNode.nextSibling.textContent, btn); }); });
+    }
+    c.appendChild(bd);
+    if (state === "done" && body) {
+      var act = el("div", "stage-actions");
+      var cp = el("button", null, "📋 Copy"); cp.type = "button"; cp.addEventListener("click", function () { copyText(body, cp); });
+      act.appendChild(cp); c.appendChild(act);
+    }
+    if (state === "error" && onRetry) {
+      var act2 = el("div", "stage-actions");
+      var rt = el("button", null, "🔁 Dobara try"); rt.type = "button"; rt.addEventListener("click", onRetry);
+      act2.appendChild(rt);
+      if (/Settings/.test(body || "")) { var sb = el("button", null, "⚙️ Settings"); sb.type = "button"; sb.addEventListener("click", function () { go("settings"); }); act2.appendChild(sb); }
+      c.appendChild(act2);
+    }
+    return c;
+  }
+
+  function parseIdeas(text) {
+    var out = [];
+    text.split("\n").forEach(function (l) {
+      var m = l.match(/^\s*(?:\*\*)?(\d+)[.)]\s*(.+)$/);
+      if (m && out.length < 5) out.push(m[2].replace(/\*\*/g, "").trim());
+    });
+    return out;
+  }
+
+  function renderStudio() {
+    var p = $("pipeline"); p.innerHTML = "";
+    var pick = $("ideaPick");
+    if (!studio || !studio.topic) { pick.hidden = true; return; }
+    STAGES.forEach(function (st, i) {
+      var s = studio.stages[st.id] || { state: "waiting" };
+      p.appendChild(stageCard(st, s.state, s.text, function () { runStudio(i); }));
+    });
+    var ideas = studio.ideas || [];
+    if (ideas.length > 1 && !studioBusy) {
+      pick.hidden = false; pick.innerHTML = "";
+      pick.appendChild(el("h4", null, "Dusra idea chahiye? Tap karo — script, caption aur shot-list naye ban jayenge:"));
+      ideas.forEach(function (idea) {
+        var c = el("button", "chip" + (idea === studio.idea ? " active" : ""), (idea === studio.idea ? "⭐ " : "") + idea); c.type = "button";
+        c.addEventListener("click", function () { if (studioBusy || idea === studio.idea) return; studio.idea = idea; runStudio(1); });
+        pick.appendChild(c);
+      });
+      if (studio.stages.shots && studio.stages.shots.state === "done") {
+        var all = el("button", "btn primary", "📦 Poora Post Kit copy karo"); all.type = "button"; all.style.width = "100%";
+        all.addEventListener("click", function () {
+          copyText("🎯 IDEA: " + studio.idea + "\n\n🎬 SCRIPT\n" + studio.stages.script.text + "\n\n✍️ CAPTIONS\n" + studio.stages.caption.text + "\n\n📷 SHOTS + THUMBNAIL\n" + studio.stages.shots.text, all);
+        });
+        pick.appendChild(all);
+      }
+    } else pick.hidden = true;
+  }
+
+  function runStudio(fromIdx) {
+    if (studioBusy) return;
+    studioBusy = true; $("studioRun").disabled = true; $("studioPlan").disabled = true;
+    for (var i = fromIdx; i < STAGES.length; i++) studio.stages[STAGES[i].id] = { state: "waiting" };
+    renderStudio();
+    var idx = fromIdx;
+    function step() {
+      if (idx >= STAGES.length) return Promise.resolve();
+      var st = STAGES[idx];
+      studio.stages[st.id] = { state: "working" }; renderStudio();
+      $("pipeline").children[idx].scrollIntoView({ behavior: "smooth", block: "center" });
+      return ask(st.sys, st.prompt(studio)).then(function (text) {
+        if (st.id === "idea") {
+          studio.ideas = parseIdeas(text);
+          studio.idea = studio.ideas[0] || text.split("\n")[0].slice(0, 200);
+        }
+        if (st.id === "script") studio.script = text;
+        studio.stages[st.id] = { state: "done", text: text }; set(LS_STUDIO, studio);
+        idx++; return step();
+      });
+    }
+    step().then(function () { toast("Post Kit ready 🔥"); }, function (e) {
+      studio.stages[STAGES[idx].id] = { state: "error", text: (e && e.friendly) || "⚠️ Kuch gadbad hui" };
+      for (var j = idx + 1; j < STAGES.length; j++) studio.stages[STAGES[j].id] = { state: "waiting" };
+      set(LS_STUDIO, studio);
+    }).then(function () {
+      studioBusy = false; $("studioRun").disabled = false; $("studioPlan").disabled = false; renderStudio();
+    });
+  }
+
+  $("studioRun").addEventListener("click", function () {
+    var topic = $("studioTopic").value.trim() || "aaj kya post karun? (koi bhi trending, youth ke liye)";
+    studio = { topic: topic, stages: {}, ideas: [], idea: "", script: "" };
+    $("planOut").innerHTML = "";
+    runStudio(0);
+  });
+
+  $("studioPlan").addEventListener("click", function () {
+    if (studioBusy) return;
+    var topic = $("studioTopic").value.trim() || (studio && studio.topic) || "mera personal content (student life, tech, motivation)";
+    var st = { emoji: "📅", name: "7-Din Content Calendar" };
+    var box = $("planOut"); box.innerHTML = ""; box.appendChild(stageCard(st, "working"));
+    box.scrollIntoView({ behavior: "smooth", block: "center" });
+    studioBusy = true; $("studioRun").disabled = true; $("studioPlan").disabled = true;
+    ask("Tum 'Content Planner Agent' ho.", "Niche/topic: " + topic + "\n\n7 din ka content calendar banao (Day 1 se Day 7). Markdown table: | Din | Platform | Video idea | Hook line | Best time |\n" +
+      "Har din ek reel/short. Platforms mix karo (Instagram, YT Shorts, Facebook). Best time India ke hisaab se (jaise 7-9 PM). Table ke baad 3 chhote tips do.", 3000)
+      .then(function (t) { box.innerHTML = ""; box.appendChild(stageCard(st, "done", t)); },
+        function (e) { box.innerHTML = ""; box.appendChild(stageCard(st, "error", (e && e.friendly) || "⚠️ Kuch gadbad hui", function () { $("studioPlan").click(); })); })
+      .then(function () { studioBusy = false; $("studioRun").disabled = false; $("studioPlan").disabled = false; });
+  });
+
   /* ---------- settings ---------- */
   function applyAccent(i) {
     var a = ACCENTS[i] || ACCENTS[0];
@@ -443,13 +609,14 @@
   $("clearAll").addEventListener("click", function () {
     if (!confirm("Sab kuch delete? (key, chats, notes, to-do, custom agents)")) return;
     Object.keys(localStorage).forEach(function (k) { if (k.indexOf("mai.") === 0) localStorage.removeItem(k); });
-    applyAccent(0); current = AGENTS[0]; selectAgent("study"); renderTodos(); renderNotes(); loadSettings(); toast("Sab saaf ho gaya 🧹");
+    applyAccent(0); current = AGENTS[0]; selectAgent("study"); studio = null; $("pipeline").innerHTML = ""; $("ideaPick").hidden = true; $("planOut").innerHTML = ""; $("studioTopic").value = ""; renderTodos(); renderNotes(); loadSettings(); toast("Sab saaf ho gaya 🧹");
   });
 
   /* ---------- boot ---------- */
   applyAccent(get(LS.accent, 0));
   selectAgent(current.id);
   renderTodos(); renderNotes();
+  if (studio && studio.topic) { $("studioTopic").value = studio.topic; if (studio.stages) Object.keys(studio.stages).forEach(function (k) { if (studio.stages[k].state === "working") studio.stages[k] = { state: "waiting" }; }); renderStudio(); }
   go("chat");
   window.MisbahAI = { buildRequest: buildRequest, friendlyError: friendlyError, extractText: extractText, API_BASE: API_BASE };
 })();

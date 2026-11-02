@@ -83,6 +83,25 @@
       </div>
     </section>
 
+    <!-- STUDIO -->
+    <section class="view" id="view-studio" aria-label="Content Studio">
+      <h2 class="view-title">Content Studio <span class="spark">✦</span></h2>
+      <p class="view-sub">Ek topic do — 4 AI agents milke poora Post Kit bana denge: idea → script → caption → shot-list. Instagram, YT Shorts, Facebook sab ke liye.</p>
+      <div class="glass card">
+        <label for="studioTopic">Topic ya sawal</label>
+        <textarea id="studioTopic" rows="2" maxlength="500" placeholder="jaise: board exam tips, gym motivation, meri mobile shop... ya bas: aaj kya post karun?"></textarea>
+        <div class="row wrap">
+          <button class="btn primary grow" id="studioRun" type="button">🚀 Post Kit banao</button>
+          <button class="btn ghost grow" id="studioPlan" type="button">📅 7-din ka plan</button>
+        </div>
+        <p class="muted small-note">Ek Post Kit = 4 AI requests (free limit ka dhyan rakho).</p>
+      </div>
+      <div class="pipeline" id="pipeline"></div>
+      <div class="idea-pick" id="ideaPick" hidden></div>
+      <div id="planOut"></div>
+      <p class="upload-note">📤 Upload tum khud karo (ya Tabu se poochho) — ye app Instagram / YouTube / Facebook pe khud post nahi karti.</p>
+    </section>
+
     <!-- SETTINGS -->
     <section class="view" id="view-settings" aria-label="Settings">
       <h2 class="view-title">Settings <span class="spark">✦</span></h2>
@@ -148,6 +167,7 @@
   <nav class="tabbar" aria-label="Menu">
     <button class="tab active" data-view="chat"><span>💬</span>Chat</button>
     <button class="tab" data-view="agents"><span>🤖</span>Agents</button>
+    <button class="tab" data-view="studio"><span>🎬</span>Studio</button>
     <button class="tab" data-view="notes"><span>📝</span>Notes</button>
     <button class="tab" data-view="settings"><span>⚙️</span>Settings</button>
   </nav>

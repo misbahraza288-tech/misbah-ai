@@ -192,3 +192,43 @@ body:not(.on-chat) .composer{display:none}
 .msg.bot a.btn{color:#05040b;text-decoration:none}
 .msg.bot .nokey a.btn,.msg.bot .nokey .btn{font-size:14px;padding:11px 10px}
 .hero-orb span{position:absolute;inset:0;display:grid;place-items:center;font-size:40px;z-index:1;animation:spin 6s linear infinite reverse}
+
+/* studio */
+.grow{flex:1 1 140px}
+.small-note{font-size:12px;margin:10px 0 0}
+.pipeline{display:flex;flex-direction:column;gap:12px}
+.stage{border-radius:var(--radius);padding:14px;border:1px solid var(--line);background:var(--glass);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);animation:pop .3s;transition:border-color .3s,box-shadow .3s}
+.stage-head{display:flex;align-items:center;gap:10px}
+.stage-head .se{font-size:22px;width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:rgba(0,0,0,.35);flex:none}
+.stage-head b{flex:1;font-size:15px}
+.stage-state{font-size:12px;padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.08);color:var(--muted);white-space:nowrap}
+.stage.working{border-color:var(--accent);box-shadow:0 0 22px color-mix(in srgb,var(--accent) 30%,transparent)}
+.stage.working .stage-state{color:var(--accent)}
+.stage.working .se{animation:wob 1s ease-in-out infinite}
+@keyframes wob{50%{transform:scale(1.15) rotate(-8deg)}}
+.stage.done .stage-state{background:color-mix(in srgb,#39ff88 18%,transparent);color:#5dffa8}
+.stage.error{border-color:rgba(255,80,110,.6)}
+.stage.error .stage-state{background:rgba(255,60,90,.15);color:#ff8da0}
+.stage-body{margin-top:10px;font-size:14px;line-height:1.5;overflow-wrap:anywhere}
+.stage-body:empty{display:none}
+.stage-body p{margin:0 0 8px}.stage-body ul,.stage-body ol{margin:4px 0 8px;padding-left:20px}
+.stage-body h2,.stage-body h3,.stage-body h4{font-size:15px;color:var(--accent);margin:10px 0 4px}
+.stage-body table{border-collapse:collapse;font-size:12px;display:block;overflow-x:auto}
+.stage-body th,.stage-body td{border:1px solid var(--line);padding:5px 7px;vertical-align:top}
+.stage-body code{background:rgba(0,0,0,.45);padding:1px 5px;border-radius:6px}
+.stage-body pre{background:#05040b;border-radius:10px;overflow:hidden}.stage-body pre code{display:block;padding:10px;overflow-x:auto;white-space:pre}
+.stage-actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.stage-actions button{background:rgba(0,0,0,.3);border:1px solid var(--line);border-radius:10px;padding:7px 12px;font-size:13px}
+.idea-pick{margin:12px 0 0}
+.idea-pick h4{margin:0 0 8px;font-size:14px;color:var(--muted)}
+.idea-pick .chip{display:block;width:100%;text-align:left;margin-bottom:8px;border-radius:14px}
+.idea-pick .chip.active{border-color:var(--accent);color:var(--accent)}
+.kit-title{font-size:18px;margin:18px 0 8px;font-weight:900}
+.upload-note{margin:16px 0 8px;padding:12px 14px;border-radius:16px;border:1px dashed color-mix(in srgb,var(--accent2) 60%,transparent);color:var(--muted);font-size:13px;background:rgba(0,0,0,.25)}
+#planOut .stage{margin-top:12px}
+.tab{font-size:10.5px}
+
+.stage-body a{color:var(--accent)}
+.stage-body table,.msg.bot table{overflow-wrap:normal;word-break:normal}
+.stage-body th,.msg.bot th{white-space:nowrap}
+.stage-body td,.msg.bot td{min-width:64px}

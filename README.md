@@ -19,6 +19,13 @@ MISBAH AI ek stylish (dark + neon) AI chat app hai jo **Google Gemini** ki free 
   - 🛍️ **Shop Bot Writer** — dukaan ke WhatsApp replies, rate list, offers
   - 👑 **Caption King** — reels captions + hashtags
   - ➕ **Custom Agent** — apna khud ka agent banao (naam + instructions)
+- 🎬 **Content Studio** — Instagram / YT Shorts / Facebook ke liye 4 agents ki team:
+  1. 💡 Trend/Idea Agent → 5 video ideas
+  2. 🎬 Script Agent → 30-60 sec Hinglish reel script
+  3. ✍️ Caption Agent → har platform ka title, caption, hashtags
+  4. 📷 Shot-list Agent → kya film karna hai + thumbnail text
+
+  Phir **Post Kit** ek tap mein copy, aur **📅 7-din ka content plan**. (Upload tum khud karo — app khud post nahi karti. Ek Post Kit = 4 AI requests.)
 - 🗂️ Har agent ki **chat alag save** hoti hai
 - 📋 Har jawab pe **Copy** button, code blocks ke liye alag copy
 - 🎤 **Voice input** — bol ke likho (Hindi / English) — Chrome mein best chalta hai
@@ -51,6 +58,7 @@ MISBAH AI ek stylish (dark + neon) AI chat app hai jo **Google Gemini** ki free 
 | Agent badalna | Chat ke upar agent wale button pe tap karo |
 | Naya agent banana | 🤖 Agents → "Apna Custom Agent banao" |
 | Nayi chat | Upar ➕ button |
+| Reel ka poora kit | 🎬 Studio tab → topic likho → 🚀 Post Kit banao |
 | Notes / To-do | 📝 Notes tab |
 | Key, model, color, data delete | ⚙️ Settings |
 
