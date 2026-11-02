@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MISBAH AI — Mera Apna AI Assistant</title>
+<meta name="description" content="MISBAH AI: Gemini se chalne wala stylish AI assistant — Study Guru, Code Bhai, Shop Bot Writer, Caption King aur apne custom agents.">
+<meta name="theme-color" content="#07060f">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta property="og:title" content="MISBAH AI">
+<meta property="og:description" content="Mera apna AI assistant — bawal style mein 🔥">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="bg" aria-hidden="true"><span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span><div class="grid"></div></div>
+
+<div class="app">
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo" aria-hidden="true">M</div>
+      <div>
+        <h1 class="brand-name">MISBAH <span>AI</span></h1>
+        <p class="brand-sub" id="statusLine">Ready hai boss ⚡</p>
+      </div>
+    </div>
+    <button class="icon-btn" id="newChatBtn" title="Nayi chat" aria-label="Nayi chat shuru karo">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+    </button>
+  </header>
+
+  <main id="main">
+    <!-- CHAT -->
+    <section class="view active" id="view-chat" aria-label="Chat">
+      <button class="agent-pill" id="agentPill" aria-label="Agent badlo">
+        <span class="agent-emoji" id="pillEmoji">🎓</span>
+        <span class="agent-meta"><b id="pillName">Study Guru</b><small id="pillDesc">JAC Class 12 ka ustaad</small></span>
+        <span class="chev" aria-hidden="true">▾</span>
+      </button>
+      <div class="messages" id="messages" aria-live="polite"></div>
+    </section>
+
+    <!-- AGENTS -->
+    <section class="view" id="view-agents" aria-label="Agents">
+      <h2 class="view-title">Agents <span class="spark">✦</span></h2>
+      <p class="view-sub">Har kaam ka alag expert. Tap karo aur shuru ho jao.</p>
+      <div class="agent-grid" id="agentGrid"></div>
+      <div class="glass card" id="customForm">
+        <h3>➕ Apna Custom Agent banao</h3>
+        <label for="caName">Naam</label>
+        <input id="caName" maxlength="40" placeholder="jaise: Gym Coach, Shayari Master">
+        <label for="caEmoji">Emoji</label>
+        <input id="caEmoji" maxlength="4" placeholder="💪">
+        <label for="caPrompt">Instructions (agent kaisa behave kare)</label>
+        <textarea id="caPrompt" rows="4" maxlength="3000" placeholder="jaise: Tum mere gym coach ho. Hinglish mein simple diet aur workout plan batao..."></textarea>
+        <button class="btn primary" id="caSave">Agent save karo</button>
+      </div>
+    </section>
+
+    <!-- NOTES -->
+    <section class="view" id="view-notes" aria-label="Notes aur To-do">
+      <h2 class="view-title">Notes &amp; To-do <span class="spark">✦</span></h2>
+      <div class="seg" role="tablist">
+        <button role="tab" class="seg-btn active" data-seg="todo" aria-selected="true">✅ To-do</button>
+        <button role="tab" class="seg-btn" data-seg="notes" aria-selected="false">📝 Notes</button>
+      </div>
+      <div class="seg-panel active" id="seg-todo">
+        <form class="add-row" id="todoForm">
+          <input id="todoInput" maxlength="200" placeholder="Kya karna hai? (jaise: Physics ch-3 revise)" aria-label="Naya to-do">
+          <button class="btn primary" type="submit">Add</button>
+        </form>
+        <ul class="todo-list" id="todoList"></ul>
+        <p class="empty" id="todoEmpty">Koi kaam pending nahi. Chill 😎</p>
+      </div>
+      <div class="seg-panel" id="seg-notes">
+        <form class="glass card note-form" id="noteForm">
+          <textarea id="noteInput" rows="3" maxlength="5000" placeholder="Kuch bhi likh lo — formula, idea, shop ka hisaab..." aria-label="Naya note"></textarea>
+          <button class="btn primary" type="submit">Note save karo</button>
+        </form>
+        <div class="note-list" id="noteList"></div>
+        <p class="empty" id="noteEmpty">Abhi koi note nahi.</p>
+      </div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section class="view" id="view-settings" aria-label="Settings">
+      <h2 class="view-title">Settings <span class="spark">✦</span></h2>
+      <div class="glass card">
+        <h3>🔑 Gemini API Key</h3>
+        <p class="muted">Key sirf tumhare phone (is browser) mein save hoti hai. Kahin upload nahi hoti.</p>
+        <div class="key-row">
+          <input id="keyInput" type="password" autocomplete="off" spellcheck="false" placeholder="AIza... yahan paste karo" aria-label="Gemini API key">
+          <button class="icon-btn small" id="keyShow" type="button" aria-label="Key dikhao / chhupao">👁</button>
+        </div>
+        <div class="row">
+          <button class="btn primary" id="keySave">Save key</button>
+          <button class="btn ghost" id="keyTest">Test karo</button>
+        </div>
+        <p class="key-status" id="keyStatus"></p>
+        <a class="btn link-btn" href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">✨ Free key lo (Google AI Studio)</a>
+      </div>
+
+      <div class="glass card">
+        <h3>🧠 AI Model</h3>
+        <select id="modelSelect" aria-label="AI model">
+          <option value="gemini-3.5-flash-lite">3.5 Flash-Lite — fast ⚡ zyada free</option>
+          <option value="gemini-3.8-flash">3.8 Flash — sabse smart 🧠 (kam free)</option>
+          <option value="gemini-flash-latest">Flash Latest — hamesha naya</option>
+        </select>
+        <p class="muted">Limit khatam ho jaye to dusra model chuno.</p>
+      </div>
+
+      <div class="glass card">
+        <h3>🎨 Theme Color</h3>
+        <div class="swatches" id="swatches"></div>
+      </div>
+
+      <div class="glass card">
+        <h3>🎤 Voice Language</h3>
+        <div class="seg small" id="voiceSeg">
+          <button class="seg-btn" data-lang="hi-IN">हिंदी</button>
+          <button class="seg-btn" data-lang="en-IN">English</button>
+        </div>
+      </div>
+
+      <div class="glass card danger">
+        <h3>🧹 Data</h3>
+        <div class="row wrap">
+          <button class="btn ghost" id="clearChat">Is agent ki chat saaf karo</button>
+          <button class="btn danger-btn" id="clearAll">Sab data delete karo</button>
+        </div>
+      </div>
+      <p class="footer-note">MISBAH AI · made for Misbah 🔥</p>
+    </section>
+  </main>
+
+  <form class="composer" id="composer" autocomplete="off">
+    <button type="button" class="icon-btn mic" id="micBtn" aria-label="Bol ke likho (voice)">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+    </button>
+    <textarea id="input" rows="1" placeholder="Kuch bhi poocho..." aria-label="Message likho"></textarea>
+    <button type="submit" class="send" id="sendBtn" aria-label="Bhejo">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12l16-8-6 16-2-7-8-1z"/></svg>
+    </button>
+  </form>
+
+  <nav class="tabbar" aria-label="Menu">
+    <button class="tab active" data-view="chat"><span>💬</span>Chat</button>
+    <button class="tab" data-view="agents"><span>🤖</span>Agents</button>
+    <button class="tab" data-view="notes"><span>📝</span>Notes</button>
+    <button class="tab" data-view="settings"><span>⚙️</span>Settings</button>
+  </nav>
+</div>
+
+<div class="sheet-backdrop" id="sheetBackdrop" hidden></div>
+<div class="sheet" id="agentSheet" role="dialog" aria-modal="true" aria-label="Agent chuno" hidden>
+  <div class="sheet-handle"></div>
+  <h3>Agent chuno</h3>
+  <div class="sheet-list" id="sheetList"></div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="md.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
